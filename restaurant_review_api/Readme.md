@@ -1,98 +1,135 @@
 # Restaurant Review API
 
-A RESTful API for a restaurant review system built with Django and Django REST Framework. Users can register, log in, add reviews for restaurants, and manage their own reviews.
+A simple RESTful API for restaurant reviews built with Django and Django REST Framework. Users can register, log in, add reviews for restaurants, and manage their own reviews. A minimal client-side frontend is included for quick testing.
 
 ## Features
 
-- **User Management:** Registration, authentication, and profile management.
-- **Review Management:** Create, read, update, and delete reviews. Each review is linked to a user and a restaurant.
-- **Restaurant Data:** View all restaurants and all reviews for a specific restaurant.
-- **Data Validation:** Ensures submitted data is valid and correctly formatted.
-- **Security:** Secure password hashing and token-based authentication.
+- User registration and JWT authentication
+- Create / Read / Update / Delete reviews (owner-only for edits/deletes)
+- Restaurant listing and details
+- View all reviews for a specific restaurant
+- Minimal JavaScript frontend to interact with the API
 
-## Technologies
+## Tech stack
 
+- Python 3.13
 - Django 5.x
 - Django REST Framework
-- PostgreSQL (for production)
-- SQLite (for development)
-- Python 3.13
+- djangorestframework-simplejwt (JWT auth)
+- SQLite (development) — db.sqlite3 in repo
+- Optional: django-cors-headers (if serving frontend from a different origin)
 
-## Project Structure
+## Repository layout
 
 ```
 restaurant_review_api/
 ├── manage.py
 ├── db.sqlite3
-├── restaurant_review_api/
+├── Readme.md
+├── requirements.txt
+├── restaurant_review_api/        # project settings
 │   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
+│   └── urls.py
+├── restaurants/                  # restaurant app
 │   └── ...
-├── restaurants/
-│   ├── models.py
-│   ├── views.py
+├── reviews/                      # review app
 │   └── ...
-├── reviews/
-│   ├── models.py
-│   ├── views.py
-│   └── ...
+├── templates/                    # frontend templates (index.html)
+└── static/                       # frontend static (css/js)
 ```
 
-## Getting Started
+## Quick start (local)
 
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/yourusername/restaurant_review_api.git
-   cd restaurant_review_api
-   ```
+1. Clone
+```sh
+git clone https://github.com/TsiOnshime/restaurant_review_api.git
+cd restaurant_review_api/restaurant_review_api
+```
 
-2. **Install dependencies:**
-   ```sh
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
+2. Create virtualenv and install
+```sh
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-3. **Apply migrations:**
-   ```sh
-   python manage.py migrate
-   ```
+3. Migrate and create admin user
+```sh
+python manage.py migrate
+python manage.py createsuperuser
+```
 
-4. **Run the development server:**
-   ```sh
-   python manage.py runserver
-   ```
+4. Run server
+```sh
+python manage.py runserver
+```
 
-## API Endpoints
+5. Open
+- Frontend: http://127.0.0.1:8000/
+- API root (DRF router): http://127.0.0.1:8000/api/
+- Admin: http://127.0.0.1:8000/admin/
 
-### User Endpoints
-- `POST /api/users/register/` — Register a new user
-- `POST /api/users/login/` — Authenticate and get a token
-- `GET /api/users/me/` — Get current user profile
-- `PUT/PATCH /api/users/me/` — Update user profile
+## API endpoints (main)
 
-### Review Endpoints
-- `GET /api/reviews/` — List all reviews
-- `POST /api/reviews/` — Create a review
-- `GET /api/reviews/<id>/` — Retrieve a review
-- `PUT/PATCH /api/reviews/<id>/` — Update a review
-- `DELETE /api/reviews/<id>/` — Delete a review
+- POST /api/auth/token/ — Obtain JWT (username & password)
+- POST /api/auth/token/refresh/ — Refresh JWT
+- GET /api/restaurants/ — List restaurants
+- POST /api/restaurants/ — Create restaurant (see permissions)
+- GET /api/restaurants/{id}/ — Restaurant details
+- GET /api/restaurants/{id}/reviews/ — Reviews for a restaurant
+- GET /api/reviews/ — List reviews
+- POST /api/reviews/ — Create review (authenticated)
+- GET /api/reviews/{id}/ — Review detail
+- PUT/PATCH /api/reviews/{id}/ — Update review (owner-only)
+- DELETE /api/reviews/{id}/ — Delete review (owner-only)
 
-### Restaurant Endpoints
-- `GET /api/restaurants/` — List all restaurants
-- `POST /api/restaurants/` — Create a restaurant (admin only)
-- `GET /api/restaurants/<id>/` — Retrieve a restaurant
-- `GET /api/restaurants/<id>/reviews/` — List reviews for a restaurant
+## Frontend (included)
+
+- Templates: `templates/index.html`
+- Static JS/CSS: `static/js/app.js`, `static/css/styles.css`
+- The frontend uses the token endpoint `/api/auth/token/` to log in and stores the access token in localStorage. If serving frontend from a separate origin, enable CORS (`django-cors-headers`).
+
+## Add data
+
+- Admin UI (recommended): /admin — add Restaurants and manage data.
+- Shell:
+```sh
+python manage.py shell
+```
+```py
+from restaurants.models import Restaurant
+Restaurant.objects.create(name="Injera", address="Addis Ababa", description="Hager bet")
+```
+
+- API (curl example):
+```sh
+curl -X POST http://127.0.0.1:8000/api/restaurants/ \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"My Cafe","address":"123 Main St","description":"Cozy spot"}'
+```
+
+## Testing
+
+Run Django tests:
+```sh
+python manage.py test
+```
+
+## Notes / next steps
+
+- Ensure serializer field names match the Review model (content vs comment). Update `reviews/serializers.py` and `static/js/app.js` to use the same field.
+- For production: switch to PostgreSQL, set DEBUG=False, and manage SECRET_KEY via environment variables.
+- Consider adding a registration endpoint and more unit tests.
 
 ## Contributing
 
-Pull requests are welcome! Please open an issue first to discuss changes.
+Fork, create a branch, commit changes, and open a pull request. Keep changes focused and include tests when possible.
 
 ## License
 
-This project is licensed under the MIT License.
+MIT
 
 ## Author
 
-Tsion Shimelis 
+Tsion Shimelis
