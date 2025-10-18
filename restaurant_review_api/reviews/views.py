@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 # Handles all CRUD operations for reviews: GET, POST, PUT, DELETE /api/reviews/
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    
+    queryset = Review.objects.select_related('user', 'restaurant').all()
     # Only authenticated users can interact with reviews (Create, Update, Delete)
     permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
 

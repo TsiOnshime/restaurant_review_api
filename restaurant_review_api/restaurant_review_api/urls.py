@@ -16,29 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from restaurants.views import RestaurantViewSet, RestaurantReviewViewSet
+from rest_framework import routers
+from restaurants.views import RestaurantViewSet
 from reviews.views import ReviewViewSet
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-# Create a router and register our viewsets with it.
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'restaurants', RestaurantViewSet, basename='restaurant')
 router.register(r'reviews', ReviewViewSet, basename='review')
-# Note: We are using RestaurantViewSet for listing and retrieving restaurants
-# The custom reviews view for a restaurant can be accessed via an @action decorator or a separate route.
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # DRF browsable API and authentication endpoints
-    path('api-auth/', include('rest_framework.urls')),
-    
-    # User Endpoints (Placeholder - you need a library like djoser or simple-jwt here)
-    # Example: path('auth/', include('djoser.urls')),
-    # Example: path('auth/', include('djoser.urls.authtoken')),
-
-    # Our core API routes
     path('api/', include(router.urls)),
-    
-    # Custom Review List route (using the action defined in RestaurantReviewViewSet)
-    path('api/restaurants/<int:pk>/reviews/', RestaurantReviewViewSet.as_view({'get': 'reviews'}), name='restaurant-reviews'),
+    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
