@@ -1,8 +1,9 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from .models import Review
 from .serializers import ReviewSerializer
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 
 # Handles all CRUD operations for reviews: GET, POST, PUT, DELETE /api/reviews/
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -18,19 +19,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     # Override to automatically set the user when a review is created (POST)
     def perform_create(self, serializer):
-        # Before saving, check if the user has already reviewed this restaurant
-        restaurant_id = serializer.validated_data.get('restaurant').id
-        if Review.objects.filter(user=self.request.user, restaurant_id=restaurant_id).exists():
-            raise PermissionDenied("You have already submitted a review for this restaurant.")
-        
-        # Save the new review, automatically setting the user field to the logged-in user
-        serializer.save(user=self.request.user)
+        user = self.request.user
+        restaurant = serializer.validated_data.get('restaurant')
+        # prevent multiple reviews by same user for the same restaurant
+        if Review.objects.filter(user=user, restaurant=restaurant).exists():
+            raise PermissionDenied("You have already reviewed this restaurant.")
+        serializer.save(user=user)
 
     # Override to ensure only the owner can update or delete a review
     def perform_update(self, serializer):
-        if serializer.instance.user != self.request.user:
+        instance = self.get_object()
+        if instance.user != self.request.user:
             raise PermissionDenied("You do not have permission to edit this review.")
-        super().perform_update(serializer)
+        serializer.save()
 
     def perform_destroy(self, instance):
         if instance.user != self.request.user:

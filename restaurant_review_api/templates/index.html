@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Home — Restaurant Reviews{% endblock %}
+{% block content %}
+<section class="panel" id="auth-panel">
+  <div class="auth-row">
+    <input id="username" placeholder="username" />
+    <input id="password" type="password" placeholder="password" />
+    <button id="btn-login">Log in</button>
+    <button id="btn-logout" hidden>Log out</button>
+    <span id="status">Not logged in</span>
+  </div>
+</section>
+
+<section class="panel" id="restaurants-panel">
+  <h2>Restaurants</h2>
+  <div id="restaurants"></div>
+</section>
+
+<section class="panel" id="reviews-panel">
+  <h2>Reviews</h2>
+  <div id="reviews"></div>
+
+  <div id="review-form" hidden>
+    <h3>Write a review</h3>
+    <label>Restaurant ID <input id="review-restaurant" type="number" /></label>
+    <label>Rating (1-5) <input id="review-rating" type="number" min="1" max="5" value="5" /></label>
+    <label>Content <textarea id="review-content"></textarea></label>
+    <button id="btn-create-review">Submit Review</button>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Restaurant Reviews{% endblock %}</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <h1><a href="{% url 'home' %}">Restaurant Reviews</a></h1>
+    <nav>
+      <a href="#" id="nav-restaurants">Restaurants</a>
+      <a href="#" id="nav-reviews">Reviews</a>
+      <span id="auth-area"></span>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <small>Demo frontend — connects to /api/</small>
+  </footer>
+
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

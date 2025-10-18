@@ -16,6 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
+
 from rest_framework import routers
 from restaurants.views import RestaurantViewSet
 from reviews.views import ReviewViewSet
@@ -26,8 +30,16 @@ router.register(r'restaurants', RestaurantViewSet, basename='restaurant')
 router.register(r'reviews', ReviewViewSet, basename='review')
 
 urlpatterns = [
+    # serve the frontend index
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
+    # existing admin / api routes
     path('admin/', admin.site.urls),
+    path('api/', include('rest_framework.urls')),  # if you use DRF browsable auth
     path('api/', include(router.urls)),
     path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
+
+# during development, serve static files
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
